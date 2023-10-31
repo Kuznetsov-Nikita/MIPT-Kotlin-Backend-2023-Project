@@ -3,14 +3,16 @@ package repository.impl
 import model.Post
 import repository.PostsRepository
 import java.time.Instant
+import java.util.Collections.synchronizedSet
 import kotlin.math.min
 import kotlin.random.Random
 
 class DefaultPostsRepository: PostsRepository {
-    private val posts: MutableSet<Post> = mutableSetOf()
     companion object {
         private const val postsPerPage: Int = 10
     }
+
+    private val posts = synchronizedSet<Post>(mutableSetOf())
         
     override fun getAll(): Collection<Post> {
         return posts.toList()
