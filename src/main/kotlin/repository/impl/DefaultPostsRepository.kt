@@ -8,8 +8,10 @@ import kotlin.random.Random
 
 class DefaultPostsRepository: PostsRepository {
     private val posts: MutableSet<Post> = mutableSetOf()
-    private val postsPerPage: Int = 10
-
+    companion object {
+        private const val postsPerPage: Int = 10
+    }
+        
     override fun getAll(): Collection<Post> {
         return posts.toList()
     }

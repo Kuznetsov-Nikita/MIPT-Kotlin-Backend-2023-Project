@@ -2,6 +2,7 @@ package api
 
 import api.model.CreatePostRequest
 import api.model.UpdatePostRequest
+import api.utils.getPathParameter
 import api.utils.isPostTextValid
 import repository.PostsRepository
 import io.ktor.http.HttpStatusCode
@@ -22,7 +23,7 @@ fun Application.postsApi() {
         }
 
         get("/posts/getPage/{page}") {
-            val pageNum = call.parameters["page"]?.toInt() ?: 0
+            val pageNum = getPathParameter("page")?.toInt() ?: 0
             val posts = postsRepository.getPage(pageNum)
 
             if (posts == null) {
@@ -33,7 +34,7 @@ fun Application.postsApi() {
         }
 
         get("/post/{id}/get") {
-            val postId = call.parameters["id"]?.toLong() ?: 0
+            val postId = getPathParameter("id")?.toLong() ?: 0
             val post = postsRepository.getById(postId)
 
             if (post == null) {
@@ -55,7 +56,7 @@ fun Application.postsApi() {
         }
 
         patch("/post/{id}/update") {
-            val postId = call.parameters["id"]?.toLong() ?: 0
+            val postId = getPathParameter("id")?.toLong() ?: 0
             val request = call.receive<UpdatePostRequest>()
 
             if (!isPostTextValid(request.postText)) {
@@ -72,7 +73,7 @@ fun Application.postsApi() {
         }
 
         delete("/post/{id}/delete") {
-            val postId = call.parameters["id"]?.toLong() ?: 0
+            val postId = getPathParameter("id")?.toLong() ?: 0
             val post = postsRepository.deletePost(postId)
 
             if (post == null) {
