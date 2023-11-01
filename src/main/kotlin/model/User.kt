@@ -3,10 +3,10 @@ package model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Post(
+data class User(
     val id: Long,
-    var text: String,
+    var login: String,
+    var password: String,
+    var name: String,
     val createdAt: String,
-    var updatedAt: String,
-    val authorId: Long,
 )

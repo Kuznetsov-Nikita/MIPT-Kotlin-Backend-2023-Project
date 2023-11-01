@@ -31,13 +31,14 @@ class DefaultPostsRepository: PostsRepository {
         return posts.find { it.id == id }
     }
 
-    override fun createPost(postText: String): Post {
+    override fun createPost(postText: String, userId: Long): Post {
         val creationTime = Instant.now().toString()
         val createdPost = Post(
             id = Random.nextLong(),
             text = postText,
             createdAt = creationTime,
             updatedAt = creationTime,
+            authorId = userId,
         )
         posts.add(createdPost)
         return createdPost
