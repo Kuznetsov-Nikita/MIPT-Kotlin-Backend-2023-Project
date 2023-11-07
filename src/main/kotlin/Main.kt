@@ -2,6 +2,8 @@ import api.authApi
 import api.postsApi
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
@@ -34,8 +36,9 @@ fun Application.configureServer() {
         })
     }
 
-    val secret = "secret"
-    val issuer = "issuer"
+    val config = ConfigFactory.load("application.conf")
+    val secret = config.getString("authorization.secret")
+    val issuer = config.getString("authorization.issuer")
     install(Authentication) {
         jwt("access") {
             verifier {
