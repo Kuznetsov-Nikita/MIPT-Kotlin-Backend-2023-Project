@@ -9,7 +9,7 @@ interface PostsRepository {
 
     fun getById(id: Long): Post?
 
-    fun createPost(postText: String): Post
+    fun createPost(postText: String, userId: Long): Post
 
     fun updatePost(id: Long, postText: String): Post?
 
