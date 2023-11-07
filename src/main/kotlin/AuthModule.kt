@@ -3,10 +3,10 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import repository.TokensRepository
 import repository.UsersRepository
-import repository.impl.DefaultTokensRepository
-import repository.impl.DefaultUsersRepository
+import repository.impl.DataBaseTokensRepository
+import repository.impl.DataBaseUsersRepository
 
 val authModule = module {
-    singleOf(::DefaultUsersRepository) bind UsersRepository::class
-    singleOf(::DefaultTokensRepository) bind TokensRepository::class
+    singleOf(::DataBaseUsersRepository) bind UsersRepository::class
+    singleOf(::DataBaseTokensRepository) bind TokensRepository::class
 }

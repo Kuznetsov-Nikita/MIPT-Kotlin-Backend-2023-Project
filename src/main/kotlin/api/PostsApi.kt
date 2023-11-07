@@ -14,6 +14,7 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.koin.ktor.ext.inject
 
 fun Application.postsApi() {
@@ -21,29 +22,42 @@ fun Application.postsApi() {
         val postsRepository by inject<PostsRepository>()
 
         get("/posts/all") {
-            val posts = postsRepository.getAll()
-            call.respond(posts)
+            try {
+                val posts = postsRepository.getAll()
+                call.respond(posts)
+            } catch (e: ExposedSQLException) {
+                call.respond(HttpStatusCode.InternalServerError)
+            }
         }
 
         get("/posts/getPage/{page}") {
             val pageNum = getPathParameter("page")?.toInt() ?: 0
-            val posts = postsRepository.getPage(pageNum)
 
-            if (posts == null) {
-                call.respond(HttpStatusCode.NotFound)
-            } else {
-                call.respond(posts)
+            try {
+                val posts = postsRepository.getPage(pageNum)
+
+                if (posts == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                } else {
+                    call.respond(posts)
+                }
+            } catch (e: ExposedSQLException) {
+                call.respond(HttpStatusCode.InternalServerError)
             }
         }
 
         get("/post/{id}/get") {
             val postId = getPathParameter("id")?.toLong() ?: 0
-            val post = postsRepository.getById(postId)
+            try {
+                val post = postsRepository.getById(postId)
 
-            if (post == null) {
-                call.respond(HttpStatusCode.NotFound)
-            } else {
-                call.respond(post)
+                if (post == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                } else {
+                    call.respond(post)
+                }
+            } catch (e: ExposedSQLException) {
+                call.respond(HttpStatusCode.InternalServerError)
             }
         }
 
@@ -59,8 +73,12 @@ fun Application.postsApi() {
                     if (userId == null) {
                         call.respond(HttpStatusCode.BadRequest)
                     } else {
-                        val createdPost = postsRepository.createPost(request.postText, userId)
-                        call.respond(createdPost)
+                        try {
+                            val createdPost = postsRepository.createPost(request.postText, userId)
+                            call.respond(createdPost)
+                        } catch (e: ExposedSQLException) {
+                            call.respond(HttpStatusCode.InternalServerError)
+                        }
                     }
                 }
             }
@@ -74,17 +92,21 @@ fun Application.postsApi() {
                     call.respond(HttpStatusCode.PayloadTooLarge)
                 } else {
                     val userId = principal?.getPrincipalParameter("id")?.toLong()
-                    var post = postsRepository.getById(postId)
+                    try {
+                        var post = postsRepository.getById(postId)
 
-                    if (post == null) {
-                        call.respond(HttpStatusCode.NotFound)
-                    } else {
-                        if (userId != post.authorId) {
-                            call.respond(HttpStatusCode.Forbidden)
+                        if (post == null) {
+                            call.respond(HttpStatusCode.NotFound)
+                        } else {
+                            if (userId != post.authorId) {
+                                call.respond(HttpStatusCode.Forbidden)
+                            }
+
+                            post = postsRepository.updatePost(postId, request.postText)
+                            call.respond(post!!)
                         }
-
-                        post = postsRepository.updatePost(postId, request.postText)
-                        call.respond(post!!)
+                    } catch (e: ExposedSQLException) {
+                        call.respond(HttpStatusCode.InternalServerError)
                     }
                 }
             }
@@ -102,8 +124,12 @@ fun Application.postsApi() {
                         call.respond(HttpStatusCode.Forbidden)
                     }
 
-                    post = postsRepository.deletePost(postId)
-                    call.respond(post!!)
+                    try {
+                        post = postsRepository.deletePost(postId)
+                        call.respond(post!!)
+                    } catch (e: ExposedSQLException) {
+                        call.respond(HttpStatusCode.InternalServerError)
+                    }
                 }
             }
         }
