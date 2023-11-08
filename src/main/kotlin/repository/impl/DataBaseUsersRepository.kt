@@ -10,18 +10,18 @@ import kotlin.random.Random
 class DataBaseUsersRepository: UsersRepository {
     override fun addUser(login: String, password: String, name: String): Boolean {
         return transaction {
-            if (getByLogin(login) == null) {
+            if (getByLogin(login) != null) {
                 false
-            }
+            } else {
+                val userId = Random.nextLong()
+                UserEntity.new(userId) {
+                    this.login = login
+                    this.password = password
+                    this.name = name
+                }
 
-            val userId = Random.nextLong()
-            UserEntity.new(userId) {
-                this.login = login
-                this.password = password
-                this.name = name
+                true
             }
-
-            true
         }
     }
 
