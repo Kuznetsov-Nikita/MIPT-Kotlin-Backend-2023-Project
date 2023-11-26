@@ -15,10 +15,17 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.ktor.plugin.Koin
+import repository.model.PostsTable
+import repository.model.TokensTable
+import repository.model.UsersTable
 
 fun main(args: Array<String>) {
     embeddedServer(Netty, port = 8080) {
+        configureDatabase()
         configureServer()
         authApi()
         postsApi()
@@ -57,5 +64,22 @@ fun Application.configureServer() {
                 call.respond(HttpStatusCode.Unauthorized)
             }
         }
+    }
+}
+
+private fun configureDatabase() {
+    val config = ConfigFactory.load("application.conf")
+    val url = config.getString("database.url")
+    val username = config.getString("database.username")
+    val password = config.getString("database.password")
+    val database = Database.connect(url = url, user = username, password = password)
+    database.initSchema()
+}
+
+private fun Database.initSchema() {
+    transaction(this) {
+        SchemaUtils.create(UsersTable)
+        SchemaUtils.create(TokensTable)
+        SchemaUtils.create(PostsTable)
     }
 }
